@@ -94,8 +94,6 @@ void loop() {
   myGLCD.setBackColor(80,150,255);                              // Define a cor de base do texto escrito
   myGLCD.print("Zerar", btn2X1 + 20, (myGLCD.getDisplayYSize()*18/20)-(myGLCD.getFontYsize()/2));  // Imprime o texto definido no centro da tela
 
-  BACK:
-
   while(!myTouch.dataAvailable())
   {
     i=0;
