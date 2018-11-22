@@ -99,11 +99,6 @@ void loop() {
     i=0;
   }
 
-  Serial.print(myTouch.getX());
-  Serial.print(",");
-  Serial.print(myTouch.getY());
-  Serial.print("\n");
-
   if(myTouch.dataAvailable())
   {
     myTouch.read();
@@ -114,7 +109,8 @@ void loop() {
       if (myTouch.getX() > 45 && myTouch.getX() < 135)
       {
         myGLCD.setColor(0,0,0);
-        myGLCD.drawRect(btn1X1, myGLCD.getDisplayYSize()*15/20, btn1X2, myGLCD.getDisplayYSize()*13/20);                // Desenha o retangulo na tela para a barra de carregamento
+        // Desenha o retangulo na tela para a barra de carregamento
+        myGLCD.drawRect(btn1X1, myGLCD.getDisplayYSize()*15/20, btn1X2, myGLCD.getDisplayYSize()*13/20);
         while (i<200)
         {
           Wire.beginTransmission(MPU);
