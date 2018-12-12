@@ -8,24 +8,21 @@
 #include <URTouch.h>
 #include <URTouchCD.h>
 
-// São utilizadas variáveis globais pois o hardware possui limitações de memória RAM
-// o que impossibilita o uso excessivo de variáveis locais
-
 // Declaração da fonte que será usada na interface gráfica.
 extern uint8_t BigFont[];
 
 UTFT myGLCD(SSD1289,38,39,40,41);               // Inicia uma instancia da impressão de interface gráfica na tela
-URTouch myTouch(6,5,4,3,2);
 
 // Endereço de comunicação dos sensores
 const int MPU=0x68;                             // Endereço de transmissão para os sensores
 
 int AcX, AcY, AcZ, Tmp, GyX, GyY, GyZ;          // Variáveis dos sensores
 int x1, x2, y1, y2;                             // Dados de coordenadas para desenhar na tela LCD
-bool bStop;                                     // Define quando para o ensaio
+bool bStop = false;                             // Define quando para o ensaio
 
-void setup()
-{
+int max = 4350, min = 3500;
+
+void setup() {
   // Inicializa comunicação seria com velocidade 9600bits/s
   Serial.begin(9600);
 
@@ -41,30 +38,9 @@ void setup()
   // Inicializa o LCD e define a fonte de texto que será utilizada
   myGLCD.InitLCD(LANDSCAPE);
   myGLCD.setFont(BigFont);
-
-  // Inicializa o sistema Touch
-  myTouch.InitTouch(LANDSCAPE);
-  myTouch.setPrecision(PREC_MEDIUM);
-  
-  // Inicializa as variáveis
-  AcX = 0;
-  AcY = 0;
-  AcZ = 0;
-  Tmp = 0;
-  GyX = 0;
-  GyY = 0;
-  GyZ = 0;
-  
-  x1 = 0;
-  x2 = 0;
-  y1 = 0;
-  y2 = 0;
-  
-  bStop = false;
 }
 
-void loop()
-{
+void loop() {
   myGLCD.clrScr();                                // Limpa a tela
   myGLCD.fillScr(VGA_WHITE);                      // Define o plano de fundo para branco
 
@@ -81,16 +57,10 @@ void loop()
   myGLCD.setColor(255,130,0);                     // Define cor do texto
   if (bStop == false)
   {
-    myGLCD.print(
-      "Aquisitando dados",
-      (myGLCD.getDisplayXSize()/2)-135,
-      (myGLCD.getDisplayYSize()/2)-(myGLCD.getFontYsize()/2));  // Imprime o texto definido no centro da tela
+    myGLCD.print("Aquisitando dados", (myGLCD.getDisplayXSize()/2)-135, (myGLCD.getDisplayYSize()/2)-(myGLCD.getFontYsize()/2));  // Imprime o texto definido no centro da tela
   } else 
   {
-    myGLCD.print(
-      "Aquisicao de dados finalizada",
-      (myGLCD.getDisplayXSize()/2)-135,
-      (myGLCD.getDisplayYSize()/2)-(myGLCD.getFontYsize()/2));  // Imprime o texto definido no centro da tela
+    myGLCD.print("Aquisicao de dados finalizada", CENTER, CENTER);  // Imprime o texto definido no centro da tela
   }
 
   while(bStop == false)
@@ -116,11 +86,5 @@ void loop()
     Serial.print(GyX); Serial.print(",");
     Serial.print(GyY); Serial.print(",");
     Serial.print(GyZ); Serial.print("\n");
-
-    if(myTouch.dataAvailable())
-    {
-      myTouch.read();
-      bStop = true;
-    }
   }
 }
