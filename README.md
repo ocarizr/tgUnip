@@ -1,5 +1,9 @@
 # Determinação de verticalidade com IMU
 
+[![Firmware CI](https://github.com/ocarizr/tgUnip/actions/workflows/ci.yml/badge.svg?branch=master&event=push)](https://github.com/ocarizr/tgUnip/actions/workflows/ci.yml)
+[![Plataforma: Arduino Mega 2560](https://img.shields.io/badge/Arduino-Mega%202560-00979D?logo=arduino&logoColor=white)](#hardware-e-dependências)
+[![Monografia em Markdown](https://img.shields.io/badge/Monografia-Markdown-21759B?logo=markdown&logoColor=white)](monografia.md)
+
 Trabalho de Engenharia da Computação da UNIP, Rafael José Mota Ocariz, 2018.
 Revisão técnica de **22 de outubro de 2026**: estimação contínua com acelerômetro
 e girômetro, quatérnios, calibração explícita e estados de falha. O hardware
@@ -142,6 +146,13 @@ não substituem medidas físicas.
 O workflow [Firmware CI](.github/workflows/ci.yml) executa esses testes em PRs
 para `master`. Seguir as [instruções do GitHub Actions](docs/github-actions.md)
 para habilitar a execução e, opcionalmente, exigir aprovação dos testes no merge.
+
+A badge Firmware CI acompanha o resultado da última execução por push na
+`master`, incluindo compilação de host, testes e AddressSanitizer. Ela leva aos
+logs do workflow. As badges Arduino e Monografia identificam a plataforma e o
+formato da documentação; não representam resultados de testes. O build para
+Mega segue o procedimento local acima, e o workflow atual não executa uma
+ferramenta dedicada de análise estática.
 
 ## Coleta e calibração
 
