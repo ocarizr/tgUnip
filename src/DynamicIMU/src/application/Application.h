@@ -10,7 +10,7 @@ namespace application {
 // Liga os módulos e mantém a ordem das tarefas cooperativas do firmware.
 class Application {
   public:
-    Application(const imu::Calibration &calibration, bool allowLab, bool enableScreen);
+    Application(const imu::Calibration &calibration, bool allowNominal, bool enableScreen);
     void begin();
     void update();
 
@@ -19,7 +19,7 @@ class Application {
     processing::Instrument instrument_;
     telemetry::SerialChannel serial_;
     ui::Screen screen_;
-    bool allowLab_;
+    bool allowNominal_;
 
     void handleCommand(char command);
     void publish(const sensors::Sample &sample);

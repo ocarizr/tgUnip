@@ -108,7 +108,7 @@ int main() {
     for (uint32_t i = 0; i < 200; ++i) {
         o.sample(Vec(0, 0, 1), Vec(), 1000000u + i * 20000u, false, true);
     }
-    expect(o.ready && o.state == LabUncalibrated, "explicit lab override");
+    expect(o.ready && o.state == NominalCalibration, "explicit nominal profile");
     o.sample(Vec(), Vec(), o.last + 20000u, false, true);
     expect(o.state == GyroOnly, "zero accel propagation");
     o.sample(Vec(0, 0, 1), Vec(), o.last + 100000u, false, true);
@@ -125,9 +125,27 @@ int main() {
     Observer moving;
     moving.beginCalibration();
     for (uint32_t i = 0; i < 250; ++i) {
-        moving.sample(Vec(0, 0, 1), Vec(.1f, 0, 0), i * 20000u, true);
+        moving.sample(Vec(0, 0, 1), Vec(2.0f, 0, 0), i * 20000u, true);
     }
-    expect(!moving.ready, "moving initialization rejected");
+    expect(!moving.ready, "rate beyond startup plausibility limit rejected");
+    Observer biased;
+    biased.beginCalibration();
+    const Vec factoryBias(20 * pi / 180, -20 * pi / 180, 20 * pi / 180);
+    for (uint32_t i = 0; i < 200; ++i) {
+        biased.sample(Vec(0, 0, 1.10f), factoryBias, i * 20000u, false, true);
+    }
+    expect(biased.ready && biased.state == NominalCalibration,
+           "nominal startup accommodates catalog gyro bias and accelerometer offsets");
+    vectorNear(biased.bias, factoryBias, 1e-6f, "catalog-scale bias estimated, not assumed zero");
+    biased.sample(Vec(0, 0, 1.10f), factoryBias, biased.last + 20000u, false, true);
+    vectorNear(biased.up(), Vec(0, 0, 1), 1e-5f, "startup bias removed during propagation");
+    Observer constantRotation;
+    constantRotation.beginCalibration();
+    for (uint32_t i = 0; i < 200; ++i) {
+        constantRotation.sample(Vec(0, 0, 1), Vec(0, 0, 0.1f), i * 20000u, true);
+    }
+    expect(constantRotation.ready,
+           "constant yaw rate cannot be distinguished from bias without external reference");
     moving.beginCalibration();
     for (uint32_t i = 0; i < 250; ++i) {
         moving.sample(Vec(0, 0, 1), Vec(i % 2 ? .06f : -.06f, 0, 0), i * 20000u, true);

@@ -14,19 +14,21 @@ try {
     $flags = @('-std=c++11', '-Wall', '-Wextra', '-Wpedantic', '-Wconversion', '-Wshadow', '-Werror')
     if ($Sanitize) {
         $flags += @('-fsanitize=address', '-g')
-        # Clang instala o runtime do AddressSanitizer fora do diretório do executável.
-        $runtime = & $Compiler --print-runtime-dir
-        if ($LASTEXITCODE -ne 0) {
-            throw 'Não foi possível localizar o runtime do Clang.'
+        if ([Environment]::OSVersion.Platform -eq [PlatformID]::Win32NT) {
+            # Clang instala o runtime do AddressSanitizer fora do diretório do executável.
+            $runtime = & $Compiler --print-runtime-dir
+            if ($LASTEXITCODE -ne 0) {
+                throw 'Não foi possível localizar o runtime do Clang.'
+            }
+            if (-not (Test-Path -LiteralPath $runtime -PathType Container)) {
+                $runtime = Join-Path (Split-Path -Parent $runtime) 'windows'
+            }
+            if (-not (Test-Path -LiteralPath $runtime -PathType Container)) {
+                throw 'Runtime do AddressSanitizer não encontrado na instalação do Clang.'
+            }
+            $windowsRuntime = Join-Path (Split-Path -Parent $runtime) 'windows'
+            $env:PATH = "$runtime$([IO.Path]::PathSeparator)$windowsRuntime$([IO.Path]::PathSeparator)$env:PATH"
         }
-        if (-not (Test-Path -LiteralPath $runtime -PathType Container)) {
-            $runtime = Join-Path (Split-Path -Parent $runtime) 'windows'
-        }
-        if (-not (Test-Path -LiteralPath $runtime -PathType Container)) {
-            throw 'Runtime do AddressSanitizer não encontrado na instalação do Clang.'
-        }
-        $windowsRuntime = Join-Path (Split-Path -Parent $runtime) 'windows'
-        $env:PATH = "$runtime$([IO.Path]::PathSeparator)$windowsRuntime$([IO.Path]::PathSeparator)$env:PATH"
     }
 
     foreach ($program in @('core_tests', 'replay')) {

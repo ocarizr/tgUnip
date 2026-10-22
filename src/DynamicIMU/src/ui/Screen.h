@@ -8,7 +8,7 @@ namespace ui {
 struct ViewModel {
     imu::State state;
     imu::Angles angles;
-    bool lab, current, relative;
+    bool nominal, current, relative;
 };
 
 enum class Action : uint8_t { None, Tare, Calibrate };

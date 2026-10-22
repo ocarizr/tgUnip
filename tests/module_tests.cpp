@@ -33,7 +33,7 @@ int emitPacket() {
     frame.maxRenderUs = 4;
     frame.calibrationId = 42;
     frame.acquisitionUs = 500;
-    frame.ready = frame.measured = frame.allowLab = frame.hasTare = true;
+    frame.ready = frame.measured = frame.allowNominal = frame.hasTare = true;
     uint8_t packet[telemetry::packetSize];
     telemetry::encodePacket(frame, 3, packet);
 #ifdef _WIN32
@@ -94,11 +94,46 @@ int main(int argc, char **argv) {
     nominal.accept(stationary, 20000);
     expect(nominal.observer().state == imu::InvalidCalibration,
            "nominal calibration stays invalid");
+    nominal.accept(stationary, 40000);
+    expect(nominal.faults() == 1, "repeated rejected nominal samples count one failure entry");
     calibration.countsPerG.x = 0;
     processing::Instrument invalid(calibration, true);
     invalid.initialize(true);
     expect(invalid.observer().state == imu::InvalidCalibration,
            "invalid scale rejected at startup");
     expect(invalid.faults() == 1, "invalid configuration counted");
+
+    // Esta lacuna é detectada dentro de Observer::sample, antes do watchdog da aplicação.
+    calibration = imu::Calibration();
+    calibration.measured = true;
+    processing::Instrument internal(calibration, false);
+    internal.initialize(true);
+    for (uint32_t time = 20000; time <= 3040000; time += 20000) {
+        internal.accept(stationary, time);
+    }
+    internal.accept(stationary, 3100000);
+    expect(internal.observer().state == imu::TimingFault, "sample itself detects timing fault");
+    expect(internal.faults() == 1, "internal observer failure reaches telemetry counter");
+    internal.checkFreshness(3120000);
+    expect(internal.faults() == 1, "watchdog does not double-count internal failure");
+    internal.sensorFault();
+    expect(internal.faults() == 2, "different failure state counts another occurrence");
+    internal.sensorFault();
+    expect(internal.faults() == 2, "same consecutive failure counted once");
+    internal.reset();
+    expect(internal.faults() == 2, "reset preserves lifetime diagnostic count");
+    internal.requestCalibration(true);
+    internal.sensorFault();
+    expect(internal.faults() == 3, "failure after explicit retry counts again");
+    processing::Instrument nominalProfile(imu::Calibration(), true);
+    nominalProfile.initialize(true);
+    for (uint32_t time = 20000; time <= 3040000; time += 20000) {
+        nominalProfile.accept(stationary, time);
+    }
+    expect(nominalProfile.observer().ready &&
+               nominalProfile.observer().state == imu::NominalCalibration,
+           "nominal profile operates without claiming measured accelerometer coefficients");
+    expect(!nominalProfile.calibration().measured && nominalProfile.calibration().id == 0,
+           "nominal provenance remains explicit");
     std::printf("PASS %d module checks\n", checks);
 }

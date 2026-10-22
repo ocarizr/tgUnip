@@ -1,8 +1,8 @@
 #include "Instrument.h"
 
 namespace processing {
-Instrument::Instrument(const imu::Calibration &calibration, bool allowLab)
-    : calibration_(calibration), allowLab_(allowLab) {}
+Instrument::Instrument(const imu::Calibration &calibration, bool allowNominal)
+    : calibration_(calibration), allowNominal_(allowNominal) {}
 
 void Instrument::initialize(bool sensorAvailable) {
     if (!sensorAvailable) {
@@ -32,12 +32,11 @@ void Instrument::accept(const imu::Raw &raw, uint32_t timestamp) {
                          calibration_.gyro(raw),
                          timestamp,
                          calibration_.measured,
-                         allowLab_);
+                         allowNominal_);
     }
 }
 
 void Instrument::fault(imu::State state) {
-    ++faults_;
     observer_.fault(state);
 }
 

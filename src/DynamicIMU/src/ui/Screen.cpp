@@ -10,7 +10,7 @@ const char *stateLabel(const ViewModel &model) {
     case imu::Tracking:
         return "FUSAO";
     case imu::GyroOnly:
-        return model.lab ? "LAB SO GIRO" : "SO GIRO";
+        return model.nominal ? "NOMINAL SO GIRO" : "SO GIRO";
     case imu::TimingFault:
         return "FALHA TEMPO";
     case imu::SensorFault:
@@ -19,8 +19,8 @@ const char *stateLabel(const ViewModel &model) {
         return "SATURACAO";
     case imu::InvalidCalibration:
         return "SEM CALIBRACAO";
-    case imu::LabUncalibrated:
-        return "LAB NAO CALIBRADO";
+    case imu::NominalCalibration:
+        return "NOMINAL";
     default:
         return "INICIALIZAR C";
     }

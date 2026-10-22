@@ -3,6 +3,7 @@
 
 #include "Attitude.h"
 #include "Statistics.h"
+#include "../sensors/Mpu6050Specs.h"
 
 namespace imu {
 // O repouso inicial estima o viés; aceleração linear pode invalidar a referência vertical.
@@ -11,8 +12,9 @@ class Observer {
     Quat q;
     Vec bias;
     State state = Uninitialized;
+    uint32_t faultCount = 0;
     float kp = 2.0f;
-    bool ready = false, lab = false, hasTare = false;
+    bool ready = false, nominal = false, hasTare = false;
     uint32_t last = 0;
     float tareX = 0, tareY = 0;
     Moments am, gm;
@@ -28,6 +30,12 @@ class Observer {
     }
 
     void fault(State s) {
+        // Conta entradas em estado de falha, inclusive as originadas em sample().
+        // Repetir a mesma falha ou pedir reset não cria novas ocorrências.
+        if (s != state &&
+            (s == TimingFault || s == SensorFault || s == Saturation || s == InvalidCalibration)) {
+            ++faultCount;
+        }
         ready = false;
         hasTare = false;
         state = s;
@@ -66,13 +74,13 @@ class Observer {
         return a;
     }
 
-    void sample(Vec a, Vec g, uint32_t t, bool calibrated, bool allowLab = false) {
+    void sample(Vec a, Vec g, uint32_t t, bool calibrated, bool allowNominal = false) {
         if (!a.finite() || !g.finite()) {
             fault(SensorFault);
             return;
         }
-        lab = !calibrated;
-        if (lab && !allowLab) {
+        nominal = !calibrated;
+        if (nominal && !allowNominal) {
             fault(InvalidCalibration);
             return;
         }
@@ -83,7 +91,11 @@ class Observer {
                 gm = Moments();
             }
             last = t;
-            if (fabsf(a.norm() - 1) > 0.08f || g.norm() > 0.08f) {
+            const float accelTolerance = calibrated ? 0.08f : mpu6050::startupAccelNormTolerance;
+            const float gyroLimit = mpu6050::startupGyroNormDps * pi / 180.0f;
+            // Exige repouso imposto pelo operador. Taxa constante e viés são
+            // indistinguíveis aqui; os gates não certificam imobilidade.
+            if (fabsf(a.norm() - 1) > accelTolerance || g.norm() > gyroLimit) {
                 am = Moments();
                 gm = Moments();
                 return;
@@ -104,7 +116,7 @@ class Observer {
                 q = Quat::fromUp(am.mean);
                 bias = gm.mean;
                 ready = true;
-                state = lab ? LabUncalibrated : Tracking;
+                state = nominal ? NominalCalibration : Tracking;
             }
             return;
         }
@@ -134,7 +146,7 @@ class Observer {
                 accepted = true;
             }
         }
-        state = accepted ? (lab ? LabUncalibrated : Tracking) : GyroOnly;
+        state = accepted ? (nominal ? NominalCalibration : Tracking) : GyroOnly;
     }
 };
 } // namespace imu

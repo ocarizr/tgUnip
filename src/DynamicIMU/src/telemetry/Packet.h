@@ -15,7 +15,7 @@ struct Frame {
     imu::State state;
     uint32_t sequence, timestamp, faults, estimatedMisses, maxRenderUs;
     uint16_t calibrationId, acquisitionUs;
-    bool ready, measured, allowLab, hasTare;
+    bool ready, measured, allowNominal, hasTare;
 };
 
 // Binário v1 little-endian, com CRC-16/CCITT-FALSE. Não acessa a UART.

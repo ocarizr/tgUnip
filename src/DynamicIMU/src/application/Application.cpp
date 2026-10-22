@@ -3,8 +3,8 @@
 #include <Arduino.h>
 
 namespace application {
-Application::Application(const imu::Calibration &calibration, bool allowLab, bool enableScreen)
-    : instrument_(calibration, allowLab), screen_(enableScreen), allowLab_(allowLab) {}
+Application::Application(const imu::Calibration &calibration, bool allowNominal, bool enableScreen)
+    : instrument_(calibration, allowNominal), screen_(enableScreen), allowNominal_(allowNominal) {}
 
 void Application::begin() {
     hardware::beginCommunication();
@@ -49,15 +49,18 @@ void Application::publish(const sensors::Sample &sample) {
     frame.calibrationId = calibration.id;
     frame.ready = observer.ready;
     frame.measured = calibration.measured;
-    frame.allowLab = allowLab_;
+    frame.allowNominal = allowNominal_;
     frame.hasTare = observer.hasTare;
     serial_.queue(frame); // Os dados brutos continuam disponíveis antes da calibração.
 }
 
 ui::ViewModel Application::viewModel(uint32_t now) const {
     const imu::Observer &observer = instrument_.observer();
-    return ui::ViewModel{
-        observer.state, observer.angles(), observer.lab, !observer.stale(now), observer.hasTare};
+    return ui::ViewModel{observer.state,
+                         observer.angles(),
+                         observer.nominal,
+                         !observer.stale(now),
+                         observer.hasTare};
 }
 
 void Application::update() {
