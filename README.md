@@ -26,6 +26,37 @@ export histórico de 2018, sem atualização; a fonte atual é o Markdown. A rev
 não representa nova aprovação acadêmica. Os originais estão no histórico Git,
 no commit `9a5279f5528d752bc9bc3225ec33e3b0dc0fcffa`.
 
+## Arquitetura do firmware
+
+```text
+src/DynamicIMU/
+├── DynamicIMU.ino        # setup/loop: entrada do Arduino
+├── Config.h             # opções da montagem e construção da calibração
+├── CalibrationData.h    # parâmetros de calibração do instrumento
+├── ImuCore.h            # interface pública do núcleo portátil para testes/replay
+└── src/
+    ├── application/     # composição dos módulos, ciclo principal e comandos
+    ├── hardware/        # inicialização de barramentos, pinagem e LCD/toque
+    ├── sensors/         # MPU-6050: configuração, aquisição I²C e amostras brutas
+    ├── processing/      # calibração, estatística, quatérnios, observador e falhas
+    ├── telemetry/       # codificação dos pacotes e transporte serial
+    └── ui/              # apresentação dos valores e ações dos botões
+```
+
+A pasta interna `src/` segue a estrutura de sketch do Arduino, que compila os
+arquivos `.cpp` recursivamente nesse diretório. As pastas de testes e scripts
+continuam na raiz do repositório; o legado permanece em `src/legacy/`.
+
+`Application` coordena a sequência: adquirir uma amostra, processar, enfileirar
+a telemetria, verificar falhas, atender a serial e atualizar uma linha da tela
+quando necessário. `Mpu6050` disponibiliza dados brutos e timestamps sem conhecer
+o estimador. `Instrument` aplica a calibração e controla o `Observer`, recebendo
+tempo como dado e sem dependência de Arduino. A tela recebe um `ViewModel` e
+devolve ações de tara/calibração; a aplicação executa essas ações. Pinagem e
+inicialização dos controladores ficam em `hardware`, enquanto o desenho fica em
+`ui`. O codificador de pacotes também é independente do hardware e pode ser
+verificado junto do decodificador Python.
+
 ## Hardware e dependências
 
 Arduino Mega 2560, MPU-6050/GY-521 em I²C no endereço `0x68`, TFT-320QVT SSD1289
@@ -92,8 +123,9 @@ python -m pip install -r requirements.txt
 
 Se os executáveis não estiverem no PATH, usar `-Compiler` e `-Python` com seus
 caminhos. `-Sanitize` habilita AddressSanitizer do Clang. O teste compila o núcleo
-com avisos tratados como erros e verifica os cálculos, CRC, ressincronização e
-ajuste de seis posições. `-Simulate` executa quatro trajetórias sintéticas com
+com avisos tratados como erros e verifica os cálculos, transições de estado,
+compatibilidade entre codificador C++ e decodificador Python, CRC,
+ressincronização e ajuste de seis posições. `-Simulate` executa quatro trajetórias sintéticas com
 referência independente de matrizes de Rodrigues em NumPy. JSON, CSV e gráficos
 SVG são gerados em `.build/results/`. Esses resultados verificam o software e
 não substituem medidas físicas.

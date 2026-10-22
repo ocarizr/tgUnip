@@ -1455,6 +1455,8 @@ Para pequeno viés acelerométrico perpendicular *b<sub>a</sub>*, em repouso δ�
 
 ### 5.9. Arquitetura e fluxo temporal
 
+O ponto de entrada DynamicIMU.ino delega a inicialização e o ciclo principal a Application. Dentro do sketch, os módulos estão em src/application, src/hardware, src/sensors, src/processing, src/telemetry e src/ui. Mpu6050 configura e lê o sensor, disponibilizando amostras brutas com timestamp; Instrument aplica a calibração e controla o Observer, sem dependência de Arduino. O módulo hardware reúne a inicialização dos barramentos e do conjunto LCD/toque. Screen recebe os valores para exibição em um ViewModel e devolve ações dos botões à aplicação. A codificação dos pacotes é independente do transporte serial. A separação mantém o núcleo numérico portátil e permite verificar o estado do instrumento e a compatibilidade da telemetria no computador.
+
 O fluxo implementado é registradores MPU → pacote assinado → calibração e montagem → verificação de inicialização → propagação → gate e correção → estado e ângulos → telemetria e uma linha do LCD. Nenhuma amostra é criada para preencher lacunas. O sensor é configurado em ±2 g, ±250°/s, PLL X, DLPF_CFG=3 e divisor 19; com clock de amostragem de 1 kHz isso fornece 50 Hz nominais. São verificados WHO_AM_I e registradores de configuração, inclusive a cada segundo. FIFO não é utilizado. DATA_RDY em INT_STATUS indica dado novo; os 14 bytes iniciados em 0x3B são lidos em burst. Repetição numérica em repouso não é falha por si só.
 
 <a id="figura-45"></a>
@@ -1498,7 +1500,7 @@ O [protocolo de bancada](docs/validacao-bancada.md) define referências, repeti�
 
 ### 5.11. Rastreabilidade e referências da revisão
 
-E1–E3 correspondem a Calibration::accel, Calibration::gyro e scripts/calibrate.py; E4–E6 a Quat, increment e aos testes analíticos; E7 a Observer::sample e convergência; E8 a inclination e testes de quadrantes/tara. Aquisição e falhas correspondem a DynamicIMU.ino e ao protocolo de bancada. Esta seção reúne a correspondência entre as equações, a implementação e a verificação em software.
+E1–E3 correspondem a Calibration::accel, Calibration::gyro e scripts/calibrate.py; E4–E6 a Quat, increment e aos testes analíticos; E7 a Observer::sample e convergência; E8 a inclination e testes de quadrantes/tara. Aquisição e falhas correspondem a Mpu6050, Instrument e Application, além do protocolo de bancada. Esta seção reúne a correspondência entre as equações, a implementação e a verificação em software.
 
 <a id="tabela-9"></a>
 
@@ -1510,7 +1512,7 @@ E1–E3 correspondem a Calibration::accel, Calibration::gyro e scripts/calibrate
 | E4–E6 | Quat e increment | Rodrigues e rotações X/Y |
 | E7 | Observer::sample | Convergência e falsa aceitação |
 | E8 | inclination e tare | Quadrantes e singularidade |
-| Aquisição e falhas | DynamicIMU.ino | AVR compilado; bancada pendente |
+| Aquisição e falhas | Mpu6050, Instrument e Application | AVR compilado; bancada pendente |
 
 Fonte: Autor, revisão de 2026.
 

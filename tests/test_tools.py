@@ -13,6 +13,27 @@ from telemetry import packets, FIELDS
 
 class ToolTests(unittest.TestCase):
 
+    def test_firmware_encoder_matches_python_decoder(self):
+        executable = Path(__file__).resolve().parents[1] / '.build/module_tests.exe'
+        data = subprocess.check_output([str(executable), '--packet'])
+        self.assertEqual(len(data), 80)
+        rows = list(packets(data))
+        self.assertEqual(len(rows), 1, 'firmware packet must pass CRC and framing')
+        row = rows[0]
+        expected = {
+            'seq': 123, 't_us': 0xfffffff0, 'ax': 16384, 'ay': -32768,
+            'az': 0, 'temp_raw': 340, 'gx': 131, 'gy': -131, 'gz': 0,
+            'qw': 1, 'qx': 0, 'qy': 0, 'qz': 0, 'cal_id': 42, 'state': 3,
+            'faults': 1, 'estimated_misses': 2, 'tx_drops': 3, 'max_render_us': 4,
+            'flags': 15, 'config_id': 1, 'acquisition_us': 500,
+        }
+        for field, value in expected.items():
+            self.assertEqual(row[field], value, field)
+        self.assertAlmostEqual(row['bx_rad_s'], 0.1, places=6)
+        self.assertAlmostEqual(row['by_rad_s'], -0.2, places=6)
+        self.assertAlmostEqual(row['bz_rad_s'], 0.3, places=6)
+        self.assertAlmostEqual(row['temp_c'], 37.53)
+
     def test_resync_crc_and_signed_values(self):
         packet = bytearray(80)
         packet[:4] = b'\xa5Z\x01\x02'

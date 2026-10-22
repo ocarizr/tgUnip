@@ -35,9 +35,22 @@ try {
             throw "Falha na compilação de $program."
         }
     }
+    $moduleSources = @(
+        'tests/module_tests.cpp',
+        'src/DynamicIMU/src/processing/Instrument.cpp',
+        'src/DynamicIMU/src/telemetry/Packet.cpp'
+    )
+    & $Compiler @flags @moduleSources -o '.build/module_tests.exe'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Falha na compilação dos testes dos módulos.'
+    }
     & './.build/core_tests.exe'
     if ($LASTEXITCODE -ne 0) {
         throw 'Falha nos testes numéricos.'
+    }
+    & './.build/module_tests.exe'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Falha na integração entre os módulos.'
     }
     & $Python -m unittest discover -s tests -p 'test_*.py' -v
     if ($LASTEXITCODE -ne 0) {
