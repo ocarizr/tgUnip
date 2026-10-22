@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <title>Ciclo de desenvolvimento e otimização do sistema</title>
+  <desc>Reprodução vetorial do diagrama editável do Word: elaboração do algoritmo, geração de código e testes de funcionamento, em ciclo.</desc>
+  <defs>
+    <marker id="seta" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0 0 L8 4 L0 8" fill="none" stroke="#5488bd"/>
+    </marker>
+  </defs>
+  <rect width="640" height="480" fill="white"/>
+  <g fill="none" stroke="#5488bd" stroke-width="2" marker-end="url(#seta)">
+    <path d="M410 115 Q570 170 500 305"/>
+    <path d="M410 385 Q315 455 215 385"/>
+    <path d="M125 305 Q60 170 230 115"/>
+  </g>
+  <g fill="#5488bd" stroke="white" stroke-width="2">
+    <rect x="230" y="45" width="180" height="115" rx="12"/>
+    <rect x="410" y="305" width="180" height="115" rx="12"/>
+    <rect x="50" y="305" width="180" height="115" rx="12"/>
+  </g>
+  <g fill="white" font-family="Times New Roman,serif" font-size="22" text-anchor="middle">
+    <text x="320" y="90">Elaboração do<tspan x="320" dy="30">Algoritmo</tspan></text>
+    <text x="500" y="350">Geração de<tspan x="500" dy="30">Código</tspan></text>
+    <text x="140" y="350">Testes de<tspan x="140" dy="30">Funcionamento</tspan></text>
+  </g>
+</svg>

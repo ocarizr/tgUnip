@@ -1,0 +1,14 @@
+.build/
+.tools/
+build/
+.venv/
+.cache/
+__pycache__/
+*.pyc
+*.elf
+*.hex
+*.o
+*.map
+*.bin
+data/
+~$*

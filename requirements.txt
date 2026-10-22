@@ -1,0 +1,4 @@
+# Simulação independente (scripts/simulate.py).
+numpy==2.3.5
+# Necessário apenas para captura serial; decodificação de arquivo usa a biblioteca padrão.
+pyserial==3.5
