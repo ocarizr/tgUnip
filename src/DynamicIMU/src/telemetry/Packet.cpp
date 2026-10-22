@@ -57,7 +57,7 @@ void encodePacket(const Frame &frame, uint32_t drops, uint8_t tx[packetSize]) {
     put32(tx, 68, frame.maxRenderUs);
     put16(tx,
           72,
-          (frame.ready ? 1 : 0) | (frame.measured ? 2 : 0) | (frame.allowLab ? 4 : 0) |
+          (frame.ready ? 1 : 0) | (frame.measured ? 2 : 0) | (frame.allowNominal ? 4 : 0) |
               (frame.hasTare ? 8 : 0));
     put16(tx, 74, 1);
     put16(tx, 76, frame.acquisitionUs);

@@ -5,16 +5,17 @@
 #include "Math.h"
 
 namespace imu {
+// Valores fazem parte do protocolo binário v1; preservar a numeração.
 enum State : uint8_t {
-    Uninitialized,
-    Calibrating,
-    Tracking,
-    GyroOnly,
-    TimingFault,
-    SensorFault,
-    Saturation,
-    InvalidCalibration,
-    LabUncalibrated
+    Uninitialized = 0,
+    Calibrating = 1,
+    Tracking = 2,
+    GyroOnly = 3,
+    TimingFault = 4,
+    SensorFault = 5,
+    Saturation = 6,
+    InvalidCalibration = 7,
+    NominalCalibration = 8
 };
 
 struct Angles {

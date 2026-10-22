@@ -6,7 +6,8 @@
 namespace imu {
 inline int16_t signedWord(uint8_t hi, uint8_t lo) {
     const uint16_t u = static_cast<uint16_t>((static_cast<uint16_t>(hi) << 8) | lo);
-    const int32_t s = u >= 32768u ? static_cast<int32_t>(u) - 65536L : static_cast<int32_t>(u);
+    const int32_t s = u >= 32768u ? static_cast<int32_t>(u) - static_cast<int32_t>(65536)
+                                  : static_cast<int32_t>(u);
     return static_cast<int16_t>(s);
 }
 

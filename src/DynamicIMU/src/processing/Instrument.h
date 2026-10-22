@@ -9,7 +9,7 @@ namespace processing {
 // Recebe timestamps como dados: nenhuma dependência de Arduino ou de I²C.
 class Instrument {
   public:
-    Instrument(const imu::Calibration &calibration, bool allowLab);
+    Instrument(const imu::Calibration &calibration, bool allowNominal);
     void initialize(bool sensorAvailable);
     void requestCalibration(bool sensorAvailable);
     void accept(const imu::Raw &raw, uint32_t timestamp);
@@ -28,14 +28,13 @@ class Instrument {
     }
 
     uint32_t faults() const {
-        return faults_;
+        return observer_.faultCount;
     }
 
   private:
     imu::Calibration calibration_;
     imu::Observer observer_;
-    bool allowLab_;
-    uint32_t faults_ = 0;
+    bool allowNominal_;
 
     void fault(imu::State state);
 };

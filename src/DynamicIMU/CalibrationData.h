@@ -1,6 +1,8 @@
 #ifndef DYNAMIC_IMU_CALIBRATION_DATA_H
 #define DYNAMIC_IMU_CALIBRATION_DATA_H
-// Nominal factory sensitivity, NOT measured calibration. Mounting identity requires verification.
+// InvenSense PS-MPU-6000A-00 rev. 3.4: ±2 g, sensibilidade nominal, ID reservado zero.
+// Os CSVs históricos não foram recuperados; estes não são coeficientes individuais medidos.
+// A identidade da montagem exige conferência física; o viés do giro é estimado em repouso.
 constexpr unsigned int CALIBRATION_ID = 0;
 constexpr bool CALIBRATION_MEASURED = false;
 constexpr float ACCEL_OFFSET[3] = {0, 0, 0};

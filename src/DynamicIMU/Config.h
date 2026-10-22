@@ -4,7 +4,8 @@
 // No historical constants are treated as new calibration measurements.
 // Replace CalibrationData.h with output of scripts/calibrate.py after six-position acquisition.
 #include "CalibrationData.h"
-constexpr bool ALLOW_UNCALIBRATED_LAB = false;
+// Perfil de fábrica identificado na tela/telemetria; não marca dados como medidos.
+constexpr bool ALLOW_NOMINAL_CALIBRATION = true;
 constexpr bool ENABLE_TFT = true;
 
 inline imu::Calibration instrumentCalibration() {

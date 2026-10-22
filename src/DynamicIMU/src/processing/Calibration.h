@@ -3,12 +3,15 @@
 
 #include "Math.h"
 #include "../sensors/RawSample.h"
+#include "../sensors/Mpu6050Specs.h"
 
 namespace imu {
 // Acelerômetro em g; girômetro em rad/s; montagem transforma sensor em corpo.
 struct Calibration {
     uint16_t version = 1, id = 0;
-    Vec offset, countsPerG = Vec(16384, 16384, 16384);
+    Vec offset,
+        countsPerG =
+            Vec(mpu6050::accelCountsPerG, mpu6050::accelCountsPerG, mpu6050::accelCountsPerG);
     Quat sensorToBody; // proper rotation; identity is a mounting assumption
     bool measured = false;
 
@@ -28,7 +31,8 @@ struct Calibration {
     }
 
     Vec gyro(const Raw &r) const {
-        return sensorToBody.rotate(Vec(r.g[0], r.g[1], r.g[2]) * (pi / (180.0f * 131.0f)));
+        return sensorToBody.rotate(Vec(r.g[0], r.g[1], r.g[2]) *
+                                   (pi / (180.0f * mpu6050::gyroCountsPerDps)));
     }
 };
 } // namespace imu

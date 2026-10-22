@@ -18,6 +18,8 @@ Arduino Mega; o desempenho físico dinâmico ainda depende de ensaios de bancada
 | [tests/](tests/) | Verificação numérica do núcleo, replay e testes das ferramentas |
 | [docs/telemetria.md](docs/telemetria.md) | Pacotes e comandos do firmware |
 | [docs/validacao-bancada.md](docs/validacao-bancada.md) | Validação física e critérios provisórios |
+| [docs/calibracao.md](docs/calibracao.md) | Manual do MPU-6050, perfil nominal e ajuste de seis posições |
+| [docs/github-actions.md](docs/github-actions.md) | Testes nos PRs e ativação no GitHub |
 
 A migração para Markdown preserva legendas, tabelas, equações e imagens. A figura
 15, originalmente um diagrama editável do Word, foi reconstituída em SVG. O DOCX
@@ -103,11 +105,18 @@ A gravação exige `-Upload` e a porta da placa. Substituir `COM4` pela porta co
 
 O firmware usa aquisição nominal de 50 Hz, faixas ±2 g e ±250 °/s, telemetria
 binária a 115200 baud e atualização parcial do LCD. A configuração entregue em
-[CalibrationData.h](src/DynamicIMU/CalibrationData.h) contém valores **nominais,
-sem calibração física**; por padrão o estimador permanece sem saída válida até
-receber dados de calibração revisados. O modo LAB é experimental e explicitamente
-identificado. Recuperar falhas exige calibração explícita, conforme a
-[telemetria](docs/telemetria.md).
+[CalibrationData.h](src/DynamicIMU/CalibrationData.h) usa o **perfil nominal do
+fabricante**, com ID zero e `CALIBRATION_MEASURED = false`. Na partida, manter
+o instrumento imóvel por pelo menos três segundos para estimar o viés do giro.
+A tela identifica **NOMINAL**; dados acelerométricos medidos permitem usar FUSAO.
+`ALLOW_NOMINAL_CALIBRATION = false` em `Config.h` desabilita o perfil nominal.
+Recuperar falhas exige calibração explícita, conforme a [telemetria](docs/telemetria.md).
+
+Os ensaios históricos incluíram horas de aquisição em posições e rotações
+distintas, em laboratório profissional com isolamento de vibração e ambiente
+a 20 °C, conforme relato do autor. Os CSVs completos não estão disponíveis;
+os valores de catálogo são a referência atual, sem reconstruir coeficientes
+individuais. As tolerâncias e limitações estão em [calibração](docs/calibracao.md).
 
 ## Testes e simulação
 
@@ -130,12 +139,17 @@ referência independente de matrizes de Rodrigues em NumPy. JSON, CSV e gráfico
 SVG são gerados em `.build/results/`. Esses resultados verificam o software e
 não substituem medidas físicas.
 
+O workflow [Firmware CI](.github/workflows/ci.yml) executa esses testes em PRs
+para `master`. Seguir as [instruções do GitHub Actions](docs/github-actions.md)
+para habilitar a execução e, opcionalmente, exigir aprovação dos testes no merge.
+
 ## Coleta e calibração
 
 Guardar aquisições em `data/`, diretório ignorado pelo Git:
 
 ```powershell
 New-Item -ItemType Directory -Force data
+python scripts/calibrate.py --nominal --output .build/CalibrationData.h
 python scripts/telemetry.py data/captura.csv --port COM4 --seconds 60 --raw data/captura.bin
 python scripts/telemetry.py data/captura.bin data/decodificada.csv
 python scripts/calibrate.py data/xp.csv data/xn.csv data/yp.csv data/yn.csv data/zp.csv data/zn.csv --output .build/CalibrationData.h
@@ -146,6 +160,11 @@ de calibração. O ajuste gera um cabeçalho separado e um JSON com identificaç
 hashes e parâmetros; revisar ambos, confirmar a montagem e só então integrar a
 calibração ao firmware. Seguir o [protocolo de bancada](docs/validacao-bancada.md)
 para os ensaios físicos, a gravidade local e a referência angular.
+
+O comando com `--nominal` exporta apenas o perfil de fábrica e sua proveniência.
+O comando com seis CSVs ajusta offset e escala do acelerômetro e registra hashes,
+resíduos e estatísticas. O viés do giro é estimado em repouso pelo firmware; a
+escala de giro permanece nominal. Os critérios estão em [calibração](docs/calibracao.md).
 
 ## Manutenção
 

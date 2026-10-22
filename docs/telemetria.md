@@ -13,7 +13,12 @@ Binário v1, 80 bytes/amostra, little-endian, 115200 baud 8N1, 50 Hz sem downsam
 | 72–77 | uint16 flags, config_id=1, duração do burst em µs |
 | 78–79 | CRC-16/CCITT-FALSE dos primeiros 78 bytes, little-endian |
 
-Flags: bit0 atitude inicializada; bit1 calibração marcada medida; bit2 override LAB habilitado; bit3 tara ativa. **bit0 não substitui estado nem frescor**: SO GIRO é degradado. Estados: 0 não inicializado; 1 calibrando; 2 fusão; 3 só giro; 4 falha de tempo; 5 sensor; 6 saturação; 7 calibração inválida; 8 LAB. Valores de quatérnio em estado não inicializado/falha não constituem saída válida. Temperatura em °C = temp_raw/340 + 36,53.
+Flags: bit0 atitude inicializada; bit1 calibração acelerométrica marcada medida; bit2 perfil nominal permitido; bit3 tara ativa. **bit0 não substitui estado nem frescor**: SO GIRO é degradado. Estados: 0 não inicializado; 1 calibrando; 2 fusão com coeficientes medidos; 3 só giro; 4 falha de tempo; 5 sensor; 6 saturação; 7 calibração inválida; 8 NOMINAL. O estado 8 e o bit2 eram rotulados LAB na versão anterior; o formato binário v1 e os valores numéricos foram preservados. ID zero e bit1 desmarcado identificam o perfil de fábrica. Valores de quatérnio em estado não inicializado/falha não constituem saída válida. Temperatura em °C = temp_raw/340 + 36,53.
+
+`faults` conta entradas em estado de falha (tempo, sensor, saturação ou calibração
+inválida), inclusive dentro do observador. Repetir o mesmo estado não incrementa
+o contador; mudar de falha ou falhar após nova tentativa incrementa. Reset e
+calibração não zeram o total, que reinicia ao energizar/resetar o microcontrolador.
 
 ```powershell
 python scripts/telemetry.py recording.bin output.csv
@@ -35,4 +40,6 @@ Enviar um único caractere ASCII minúsculo pela serial, a 115200 baud:
 
 A calibração estacionária estima o viés do girômetro. Ela não substitui o ajuste
 de seis posições do acelerômetro nem a verificação da montagem. O cabeçalho
-nominal entregue impede a operação normal até integrar uma calibração medida.
+nominal entregue permite operação identificada como NOMINAL após repouso.
+Desabilitar `ALLOW_NOMINAL_CALIBRATION` exige ajuste acelerométrico medido.
+Consultar os [parâmetros e critérios de calibração](calibracao.md).

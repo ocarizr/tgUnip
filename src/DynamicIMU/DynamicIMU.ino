@@ -3,7 +3,7 @@
 #include "src/application/Application.h"
 
 namespace {
-application::Application instrument(instrumentCalibration(), ALLOW_UNCALIBRATED_LAB, ENABLE_TFT);
+application::Application instrument(instrumentCalibration(), ALLOW_NOMINAL_CALIBRATION, ENABLE_TFT);
 }
 
 void setup() {

@@ -1,6 +1,6 @@
 # Protocolo de bancada da revisão dinâmica
 
-Status: **pendente; nenhum ensaio físico novo foi executado**. Este documento pode ser executado pelo responsável de laboratório após revisar pinagem, alimentação, montagem e calibração. A compilação não é autorização para gravar firmware.
+Status da revisão dinâmica: **validação física pendente**. O autor relata ensaios históricos prolongados em laboratório profissional, com isolamento de vibração, diferentes posições e rotações e ambiente a 20 °C. Os CSVs completos não estão disponíveis para reanálise. Este protocolo complementa o trabalho histórico e pode ser executado pelo responsável de laboratório após revisar pinagem, alimentação, montagem e calibração.
 
 ## Preparação e referências
 
@@ -18,7 +18,7 @@ Sincronizar referência e telemetria por evento observável comum, por exemplo d
 4. Avaliar inclinações estáticas independentes da calibração: 0°, ±15°, ±30°, ±45°, ±60°, 90°, 135° e 180°, em planos compatíveis com a montagem. Fazer cinco repetições com novo assentamento por ponto e coletar pelo menos 20 s após estabilização. Registrar Y indefinido nas orientações singulares, sem tratá-lo como erro numérico zero. Comparar direção vertical e sinais de X/Y, não somente magnitude.
 5. Na mesa de um eixo, executar taxas positivas e negativas de 10, 30 e 90°/s, três revoluções completas, cinco repetições. Esses valores são propostas de ensaio, não faixa validada. Uma mesa de um eixo valida somente essa trajetória. Para alegar 3D, usar referência óptica/mesa apropriada e executar sequências não comutativas, taxas variáveis e movimento combinado com referência temporal.
 6. Introduzir translação, oscilações e rotação com diferentes braços de alavanca. Incluir perturbação cuja norma de força específica fique próxima de 1 g com direção alterada. Medir duração do estado SO GIRO e erro durante e após a perturbação. O retorno ao estado FUSAO não prova ausência de aceleração. Não exigir que a fusão supere a referência estática em todo cenário.
-7. Interromper I²C/desconectar sensor, provocar lacuna temporal e restabelecer conexão. Confirmar falha, rejeição de dado velho e necessidade de C para recuperação. Não fazer curto entre alimentação e dados. Confirmar tara, U e R em repouso, inclusive corte de ±180° e tentativa de tara em singularidade. Registrar estado LAB se override deliberadamente habilitado.
+7. Interromper I²C/desconectar sensor, provocar lacuna temporal e restabelecer conexão. Confirmar falha, rejeição de dado velho e necessidade de C para recuperação. Não fazer curto entre alimentação e dados. Confirmar tara, U e R em repouso, inclusive corte de ±180° e tentativa de tara em singularidade. Registrar se o estado é NOMINAL ou FUSAO com coeficientes medidos; conferir ID e flags da calibração na telemetria.
 8. Repetir após cinco ciclos de alimentação e nas temperaturas seguras permitidas pelo hardware, registradas com instrumento independente. Não extrapolar uma calibração à temperatura inteira de operação. Registrar deriva em repouso por pelo menos uma hora para análise de estabilidade; estimar Allan para vários τ e informar número de blocos e regularidade temporal.
 
 ## Métricas, orçamento e critérios provisórios
